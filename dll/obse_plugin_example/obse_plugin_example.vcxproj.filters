@@ -7571,8 +7571,12 @@
     <ClInclude Include="ReverseEngineered\_BASE.h" />
     <ClInclude Include="shared.h" />
     <ClInclude Include="Patches\Logging.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SkyBSA.rc" />
   </ItemGroup>
 </Project>

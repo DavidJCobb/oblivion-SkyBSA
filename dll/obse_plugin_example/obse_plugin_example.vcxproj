@@ -141,6 +141,7 @@
     <ClInclude Include="Patches\BSAOverridingBSA.h" />
     <ClInclude Include="Patches\Logging.h" />
     <ClInclude Include="Patches\LooseFilesAlwaysOverride.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="ReverseEngineered\Files\Archive.h" />
     <ClInclude Include="ReverseEngineered\Files\BSFile.h" />
     <ClInclude Include="ReverseEngineered\_BASE.h" />
@@ -148,6 +149,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SkyBSA.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

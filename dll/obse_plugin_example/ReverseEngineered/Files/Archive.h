@@ -11,6 +11,7 @@ namespace RE {
       DEFINE_MEMBER_FN(Constructor,        BSHash&, 0x006FA2D0, const char* str, UInt32 type);
       DEFINE_MEMBER_FN(Subroutine0042BC10, UInt32,  0x0042BC10, const BSHash& other);
    };
+   DEFINE_SUBROUTINE_EXTERN(void, HashFilePath, 0x006FA1B0, const char* filename, BSHash& outFile, BSHash& outFolder);
 
    class Archive;
    constexpr UInt32 ce_bsaSignatureBSwapped = '\0ASB';
@@ -22,9 +23,9 @@ namespace RE {
    extern NiTArray<BSHash>* const g_archiveInvalidatedFilenames;
    extern NiTArray<BSHash>* const g_archiveInvalidatedDirectoryPaths;
 
-   // don't know if this is safe to call:
+   // Not sure if LoadBSAFile is safe to call; others almost certainly aren't, or are already called during startup
    DEFINE_SUBROUTINE_EXTERN(void, LoadBSAFile, 0x0042F4C0, const char* filePath, UInt32 zeroA, UInt32 zeroB); // adds archive to g_archiveList
-   //
+   DEFINE_SUBROUTINE_EXTERN(void, DiscardAllBSARetainedFilenames, 0x0042C970);
    DEFINE_SUBROUTINE_EXTERN(void, ReadArchiveInvalidationTxtFile, 0x0042D840, const char* filename);
 
    enum BSAFlags : UInt32 {
@@ -111,8 +112,7 @@ namespace RE {
          BSAHeader header; // 154
          BSAEntry* folders = nullptr; // 178 // array
          UInt32 unk17C;
-         UInt32 unk180;
-         UInt32 unk184;
+         __time64_t myDateModified; // 180 // same type as the Date Modified in stat()
          UInt32 unk188 = 0; // same type as unk148
          UInt32 unk18C = -1;
          UInt32 unk190 = -1;
@@ -148,13 +148,15 @@ namespace RE {
 
          MEMBER_FN_PREFIX(Archive);
          DEFINE_MEMBER_FN(Constructor, Archive&, 0x0042EE80, const char* filePath, UInt32, bool, UInt32);
-         DEFINE_MEMBER_FN(CheckDelete, void, 0x0042C910); // Dispose(true), with conditions?
+         DEFINE_MEMBER_FN(CheckDelete,    void, 0x0042C910); // Dispose(true), with conditions?
+         DEFINE_MEMBER_FN(CheckFileIsOverridden, bool, 0x0042C1D0, BSAEntry& file, const char* looseFilePath); // called by FolderContainsFile; invalidates the file if it's older than a matching loose file
+         DEFINE_MEMBER_FN(ContainsFile,   bool, 0x0042E020, const BSHash& file, const BSHash& folder, UInt32& outFolderIndex, UInt32& outFileIndexInFolder, const char* normalizedFilepath); // just calls ContainsFolder and FolderContainsFile
+         DEFINE_MEMBER_FN(ContainsFolder, bool, 0x0042CE40, const BSHash& folder, UInt32& outFolderIndex, const char* normalizedFilepath);
+         DEFINE_MEMBER_FN(DiscardRetainedFilenames,   void, 0x0042C0D0, UInt32); // conditional on unk194 flag 0x04
+         DEFINE_MEMBER_FN(FolderContainsFile, bool, 0x0042D000, UInt32 folderIndex, const BSHash& file, UInt32& outFileIndexInFolder, const char* normalizedFilepath, UInt32 zero); // file path is used for CheckFileIsOverridden
          DEFINE_MEMBER_FN(RetainsFilenameStringTable, bool, 0x0042BD30);
          DEFINE_MEMBER_FN(RetainsFilenameOffsetTable, bool, 0x0042BD50);
          DEFINE_MEMBER_FN(Subroutine0042BD70, bool, 0x0042BD70);
-         DEFINE_MEMBER_FN(Subroutine0042CE40, bool, 0x0042CE40, BSHash&, UInt32& outFolderIndex, const char* normalizedFilepath);
-         DEFINE_MEMBER_FN(Subroutine0042D000, bool, 0x0042D000, UInt32 folderIndex, BSHash&, UInt32& outFileIndexInFolder, UInt32 zero, const char* normalizedFilepath);
-         DEFINE_MEMBER_FN(Subroutine0042E020, bool, 0x0042E020, UInt32, UInt32, UInt32, UInt32, const char* normalizedFilepath);
          DEFINE_MEMBER_FN(Subroutine0042E070, UInt32, 0x0042E070, UInt32, UInt32, UInt32, UInt32); // load a file?
          //
          // The below are all called during the constructor, so don't use them:
