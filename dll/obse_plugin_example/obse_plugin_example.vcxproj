@@ -123,8 +123,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="definitions.cpp" />
-    <ClCompile Include="Patches\CrashLog.cpp" />
     <ClCompile Include="dllmain.c">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ForcedIncludeFiles>
@@ -132,14 +130,24 @@
       </ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Patches\Logging.cpp" />
+    <ClCompile Include="Patches\LooseFilesAlwaysOverride.cpp" />
+    <ClCompile Include="Patches\BSAOverridingBSA.cpp" />
+    <ClCompile Include="ReverseEngineered\Files\Archive.cpp" />
+    <ClCompile Include="ReverseEngineered\_BASE.cpp" />
+    <ClCompile Include="shared.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="definitions.h" />
-    <ClInclude Include="Patches\CrashLog.h" />
+    <ClInclude Include="Patches\BSAOverridingBSA.h" />
+    <ClInclude Include="Patches\Logging.h" />
+    <ClInclude Include="Patches\LooseFilesAlwaysOverride.h" />
+    <ClInclude Include="ReverseEngineered\Files\Archive.h" />
+    <ClInclude Include="ReverseEngineered\Files\BSFile.h" />
+    <ClInclude Include="ReverseEngineered\_BASE.h" />
+    <ClInclude Include="shared.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
-    <None Include="Registered Plugin Function Names.xls" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

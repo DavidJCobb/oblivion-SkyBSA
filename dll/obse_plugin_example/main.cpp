@@ -3,6 +3,7 @@
 
 #include "Patches/LooseFilesAlwaysOverride.h"
 #include "Patches/BSAOverridingBSA.h"
+#include "Patches/Logging.h"
 
 IDebugLog    gLog("Data\\OBSE\\Plugins\\SkyBSA.log");
 PluginHandle g_pluginHandle = kPluginHandle_Invalid;
@@ -48,6 +49,7 @@ extern "C" {
       if (!obse->isEditor) {
          SkyBSAPatches::LooseFilesAlwaysOverride::Apply();
          SkyBSAPatches::BSAOverridingBSA::Apply();
+         SkyBSAPatches::Logging::Apply();
          //
          // GOALS:
          //
