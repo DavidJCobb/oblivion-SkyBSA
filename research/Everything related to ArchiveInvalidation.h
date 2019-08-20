@@ -7,7 +7,14 @@
 // Think of this file as a "pidgin language" version of C++. Among other things, it's not 
 // strict about types and variable name reuse; my preference was for the code to be readable 
 // and recognizable to C++ developers, while still accurately indicating what registers are 
-// used for what in any case where I could do so without compromising readability.
+// used for what in any case where I could do so without compromising readability. So, you 
+// may see things like this:
+//
+//    Foo* eax = someSubroutine();
+//    Bar* eax = eax->someFooMemberFunction();
+//
+// which would be syntactically incorrect in C and C++, yet which is fairly clear to a human 
+// reader.
 //
 // For class/struct definitions, refer to Archive.h in NorthernUI's source code.
 
