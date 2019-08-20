@@ -78,6 +78,11 @@ void ReadArchiveInvalidationTXTFile(const char* filepath) {
    ebx->Dispose(true);
 }
 
+//
+// Archives run ArchiveInvalidation when they load. This function is run 
+// INSTEAD OF ArchiveInvalidation if the archive doesn't retain file and 
+// folder names in memory.
+//
 UInt32 Archive::InvalidateAgainstLooseFiles(const char* pathRoot, const char* pathDeep, FILETIME* thisArchiveLastModified) {
    auto ebx = this;
    char esp17C[MAX_PATH]; // stack 0x17C - 0x280
@@ -141,6 +146,14 @@ UInt32 Archive::InvalidateAgainstLooseFiles(const char* pathRoot, const char* pa
    return esp14;
 }
 
+//
+// Archives run ArchiveInvalidation when they load; specifically, this 
+// function is called by the Archive constructor. If the archive does 
+// not retain file and folder names, then this function just calls the 
+// InvalidateAgainstLooseFiles member function and returns its result.
+//
+// Either way, we return the number of files invalidated on load.
+//
 UInt32 Archive::InvalidateOlderFiles() {
    auto edi   = this;
    auto esp0C = this;
@@ -404,7 +417,8 @@ Archive::Archive(Arg1, UInt32 Arg2, Arg3, Arg4) {
 }
 
 // only affects BSAs in g_archiveList, so Archives can use it while loading; 
-// in practice, none should actually end up using it
+// in practice, none should actually end up using it. nothing else in the 
+// executable calls this
 void InvalidateFileInAllLoadedBSAs(BSHash* folder, BSHash* file, UInt16 filetypeFlags) {
    auto ebx = *g_archiveList;
    if (!ebx)
@@ -427,6 +441,10 @@ void InvalidateFileInAllLoadedBSAs(BSHash* folder, BSHash* file, UInt16 filetype
    } while (ebx = ebx->next);
 }
 
+//
+// This function is used to load BSA files; it's only called from one place 
+// (see further below).
+//
 Archive* LoadBSAFile(const char* filepath, UInt16 /*always zero*/overrideFiletypeFlags, unknown_type /*always zero*/Arg3) {
    if (!INI::Archive::bUseArchive->b)
       return nullptr;
@@ -535,12 +553,12 @@ bool sub0042F610() {
       ebx = edi * 8;
       do {
          //
-         // ...
+         // ... TODO: MINOR STUFF ...
          //
       } while (++esi < 0x18); // at 0x0042F6BB
       if (esp1C != 0) {
          //
-         // ...
+         // ... TODO: MINOR STUFF ...
          //
       }
       esi = esp14;
@@ -570,7 +588,7 @@ bool sub0042F610() {
                continue;
             strcpy(eax, "*.bsa");
             //
-            // ...
+            // ... TODO: MINOR STUFF ...
             //
             auto ebx = sub009844EC(&esp148, &esp20); // at 0x0042F86C
             if (ebx == -1)
