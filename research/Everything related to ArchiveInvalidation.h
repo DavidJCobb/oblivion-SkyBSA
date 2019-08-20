@@ -269,7 +269,7 @@ UInt32 Archive::InvalidateOlderFiles() {
    //
    // Code below runs only for BSAs with no file/folder names retained:
    //
-   Log004A7A60("bInvalidateOlderFiles is true in the INI file, but the archive doesn't have directory or file strings.  This is going to be really really slow.");/
+   Log004A7A60("bInvalidateOlderFiles is true in the INI file, but the archive doesn't have directory or file strings.  This is going to be really really slow.");
    WIN32_FIND_DATAA esp38;
    auto eax = FindFirstFileA(&this->m_path, &esp38);
    if (eax == -1) {
