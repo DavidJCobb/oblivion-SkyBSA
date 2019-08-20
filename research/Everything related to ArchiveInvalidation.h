@@ -586,8 +586,8 @@ bool sub0042F610() {
       if (esi >= 0x18)
          continue;
       do { // at 0x0042F690
-         ecx = g_mapExtensionsToFiletypeFlags[edi]; // ebx = edi * 8
-         edx = g_mapExtensionsToFiletypeFlags[esi]; // ebp = esi * 8
+         ecx = g_mapExtensionsToFiletypeFlags[edi].extension; // ebx = edi * 8
+         edx = g_mapExtensionsToFiletypeFlags[esi].extension; // ebp = esi * 8
          auto eax = sub0098262D(edx, ecx);
          if (eax < 0) {
             edi = esi;
