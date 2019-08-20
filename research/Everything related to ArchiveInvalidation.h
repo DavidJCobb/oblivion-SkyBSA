@@ -57,9 +57,9 @@ void ReadArchiveInvalidationTXTFile(const char* filepath) {
                   esi = &line[1];
                auto esp14 = new BSHash(esi, edi);
                auto ecx = *g_archiveInvalidateDirectoryPaths;
-               auto esi = ecx->unk0A;
-               if (esi >= ecx->unk08)
-                  ecx->SetCapacity(ecx->unk0E + esi);
+               auto esi = ecx->firstFreeEntry;
+               if (esi >= ecx->capacity)
+                  ecx->SetCapacity(ecx->growSize + esi);
                ecx->AddAtIndex(esi, &esp14);
             } else { // path is just a filename
                if (!*g_archiveInvalidatedFilenames) {
@@ -67,9 +67,9 @@ void ReadArchiveInvalidationTXTFile(const char* filepath) {
                }
                auto esp14 = new BSHash(&line, ebp);
                auto ecx = *g_archiveInvalidatedFilenames;
-               auto esi = ecx->unk0A;
-               if (esi >= ecx->unk08)
-                  ecx->SetCapacity(ecx->unk0E + esi);
+               auto esi = ecx->firstFreeEntry;
+               if (esi >= ecx->capacity)
+                  ecx->SetCapacity(ecx->growSize + esi);
                ecx->AddAtIndex(esi, &esp14);
             }
          } while (eax = ebx->Unk_0A(&line, MAX_PATH, '\r'));
@@ -157,7 +157,7 @@ UInt32 Archive::InvalidateOlderFiles() {
          auto ebp = this->folders[esp20];
          auto esp14 = ebp;
          if (eax) {
-            auto ebx = eax->unk0A;
+            auto ebx = eax->firstFreeEntry;
             auto esi = 0;
             if (ebx > 0) {
                do {
@@ -198,7 +198,7 @@ UInt32 Archive::InvalidateOlderFiles() {
             auto edx = ebp->files[esp28];
             if (!eax)
                continue;
-            SInt32 esp2C = eax->unk08;
+            SInt32 esp2C = eax->firstFreeEntry;
             if (esp2C <= 0)
                continue;
             do {
@@ -478,7 +478,7 @@ void sub0042BE70() {
    // at 0x0042BEB8
    auto ecx = *g_archiveInvalidatedFilenames;
    if (ecx) {
-      for(UInt32 esi = 0; esi < (*g_archiveInvalidatedFilenames)->unk0A; ++esi) {
+      for(UInt32 esi = 0; esi < (*g_archiveInvalidatedFilenames)->firstFreeEntry; ++esi) {
          auto ecx = *g_archiveInvalidatedFilenames[esi];
          delete ecx; // actually FormHeap_Free
       }
@@ -487,7 +487,7 @@ void sub0042BE70() {
    // at 0x0042BEF8
    auto ecx = *g_archiveInvalidatedDirectoryPaths;
    if (ecx) {
-      for(UInt32 esi = 0; esi < (*g_archiveInvalidatedDirectoryPaths)->unk0A; ++esi) {
+      for(UInt32 esi = 0; esi < (*g_archiveInvalidatedDirectoryPaths)->firstFreeEntry; ++esi) {
          auto ecx = *g_archiveInvalidatedDirectoryPaths[esi];
          delete ecx; // actually FormHeap_Free
       }
