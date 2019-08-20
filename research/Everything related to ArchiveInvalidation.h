@@ -33,6 +33,41 @@ LinkedPointerList<Archive>* const g_archiveList = (LinkedPointerList<Archive>*) 
 NiTArray<BSHash>* const g_archiveInvalidatedFilenames      = (NiTArray<BSHash>*) 0x00B33930;
 NiTArray<BSHash>* const g_archiveInvalidatedDirectoryPaths = (NiTArray<BSHash>*) 0x00B33934;
 
+struct _ExtensionMapEntry {
+   char   extension[4];
+   UInt32 filetypeFlags;
+};
+_ExtensionMapEntry g_mapExtensionsToFiletypeFlags[0x18] = { // at 0x00B04368
+   //
+   // apparently this can be modified during load but I think this is what you'll 
+   // find if you inspect the memory after load
+   //
+   { '\0\0\0\0', 0 },
+   { 'bmp\0', kBSAFiletypeFlag_Textures },
+   { 'cmp\0', kBSAFiletypeFlag_Meshes },
+   { 'dds\0', kBSAFiletypeFlag_Textures },
+   { 'egm\0', kBSAFiletypeFlag_Meshes },
+   { 'egt\0', kBSAFiletypeFlag_Meshes },
+   { 'fnt\0', kBSAFiletypeFlag_Fonts },
+   { 'h\0\0\0', kBSAFiletypeFlag_Shaders },
+   { 'kf\0\0', kBSAFiletypeFlag_Meshes },
+   { 'lip\0', kBSAFiletypeFlag_Voices },
+   { 'lod\0', kBSAFiletypeFlag_Meshes },
+   { 'lsl\0', kBSAFiletypeFlag_Shaders },
+   { 'mp3\0', kBSAFiletypeFlag_Voices },
+   { 'nif\0', kBSAFiletypeFlag_Meshes },
+   { 'psh\0', kBSAFiletypeFlag_Shaders },
+   { 'pso\0', kBSAFiletypeFlag_Shaders },
+   { 'spt\0', kBSAFiletypeFlag_Trees },
+   { 'tex\0', kBSAFiletypeFlag_Fonts },
+   { 'tga\0', kBSAFiletypeFlag_Textures },
+   { 'tri\0', kBSAFiletypeFlag_Meshes },
+   { 'vsh\0', kBSAFiletypeFlag_Shaders },
+   { 'vso\0', kBSAFiletypeFlag_Shaders },
+   { 'wav\0', kBSAFiletypeFlag_Sounds },
+   { 'xml\0', kBSAFiletypeFlag_Menus },
+};
+
 void ReadArchiveInvalidationTXTFile(const char* filepath) {
    auto ebp = 0;
    BSFile* ebx = sub00431690(filepath, 0, 0x2800);
@@ -550,16 +585,24 @@ bool sub0042F610() {
       esi = esp1C + 1;
       if (esi >= 0x18)
          continue;
-      ebx = edi * 8;
-      do {
-         //
-         // ... TODO: MINOR STUFF ...
-         //
+      do { // at 0x0042F690
+         ecx = g_mapExtensionsToFiletypeFlags[edi]; // ebx = edi * 8
+         edx = g_mapExtensionsToFiletypeFlags[esi]; // ebp = esi * 8
+         auto eax = sub0098262D(edx, ecx);
+         if (eax < 0) {
+            edi = esi;
+            ebx = ebp;
+         }
       } while (++esi < 0x18); // at 0x0042F6BB
       if (esp1C != 0) {
-         //
-         // ... TODO: MINOR STUFF ...
-         //
+         esi = g_mapExtensionsToFiletypeFlags[edi].extension;
+         ecx = g_mapExtensionsToFiletypeFlags[esp18 / 8].extension;
+         edx = g_mapExtensionsToFiletypeFlags[esp18 / 8].filetypeFlags;
+         g_mapExtensionsToFiletypeFlags[esp18 / 8].extension = esi;
+         esi = g_mapExtensionsToFiletypeFlags[edi].filetypeFlags;
+         g_mapExtensionsToFiletypeFlags[esp18 / 8].filetypeFlags = esi;
+         g_mapExtensionsToFiletypeFlags[edi].extension     = ecx;
+         g_mapExtensionsToFiletypeFlags[edi].filetypeFlags = edx;
       }
       esi = esp14;
    } while ((esp1C = esi) < 0x17);
@@ -573,6 +616,7 @@ bool sub0042F610() {
    if (esi) { // at 0x0042F782
       auto eax = sub0098474B(esi); // funcs at 0x0098xxxx are typically standard library stuff
       if (eax == 0) {
+         _finddata_t esp20;
          do {
             char esp24C[MAX_PATH];
             getline(&esp24C, MAX_PATH, esi);
@@ -587,10 +631,12 @@ bool sub0042F610() {
             if (eax == 0)
                continue;
             strcpy(eax, "*.bsa");
-            //
-            // ... TODO: MINOR STUFF ...
-            //
-            auto ebx = sub009844EC(&esp148, &esp20); // at 0x0042F86C
+            memcpy(&esp148, "Data\\", 6); // inlined -- direct assign of UInt32 'ataD' and UInt16 '\0\\'
+            auto edx = &esp24C;
+            auto eax = strlen(edx); // circa 0x0042F840
+            strcpy(&esp148 + strlen(&esp148), edx, eax);
+            // esp148 == "Data\\" prepended to esp24C
+            auto ebx = _findfirst(&esp148, &esp20); // at 0x0042F86C
             if (ebx == -1)
                continue;
             do {
@@ -602,9 +648,9 @@ bool sub0042F610() {
                // inlined: append ", " to the end of (ebp)
                //
                //
-               // inlined: append (esp44) to (ebp)
+               // inlined: append (esp20.name) to (ebp)
                //
-            } while (eax = sub0098461C(ebx, &esp20));
+            } while (_findnext(ebx, &esp20) == 0);
          } while (eax = sub0098474B(esp14));
       }
    }
