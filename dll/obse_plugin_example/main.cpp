@@ -3,6 +3,7 @@
 
 #include "Patches/LooseFilesAlwaysOverride.h"
 #include "Patches/BSAOverridingBSA.h"
+#include "Patches/BSARedirection.h"
 #include "Patches/Logging.h"
 
 IDebugLog    gLog("Data\\OBSE\\Plugins\\SkyBSA.log");
@@ -13,7 +14,7 @@ extern "C" {
       // fill out the info structure
       info->infoVersion = PluginInfo::kInfoVersion;
       info->name        = "SkyBSA";
-      info->version     = 0x01000000; // major, minor, patch, build // REMINDER: Update SkyBSA.rc, which controls what people see if they right-click the DLL and go to Details
+      info->version     = 0x01010000; // major, minor, patch, build // REMINDER: Update SkyBSA.rc, which controls what people see if they right-click the DLL and go to Details
 
       {  // log our version number -- be helpful!
          auto v = info->version;
@@ -50,6 +51,7 @@ extern "C" {
          _MESSAGE("We're loading in the game, not the editor.");
          SkyBSAPatches::LooseFilesAlwaysOverride::Apply();
          SkyBSAPatches::BSAOverridingBSA::Apply();
+         SkyBSAPatches::BSARedirection::Apply();
          //SkyBSAPatches::Logging::Apply();
       }
       _MESSAGE("DLL successfully loaded.");

@@ -3,6 +3,30 @@
 
 namespace SkyBSAPatches {
    namespace Logging {
+      namespace LogLazyLokups {
+         void _stdcall Inner(const char* path) {
+            if (path)
+               _MESSAGE("Detected lazy lookup to: %s", path);
+            else
+               _MESSAGE("Detected lazy lookup, but no path was given.");
+         }
+         __declspec(naked) void Outer() {
+            _asm {
+               mov  edx, dword ptr [esp + 0x10];
+               push edx;
+               call Inner; // stdcall
+               mov  edx, dword ptr [esp + 4];       // reproduce patched-over instructions
+               mov  eax, 0x00B338E8;                //
+               mov  ecx, dword ptr [edx * 4 + eax]; //
+               mov  eax, 0x0042DB1B;
+               jmp  eax;
+            };
+         }
+         void Apply() {
+            WriteRelJump(0x0042DB10, (UInt32)&Outer);
+         }
+      }
+
       void Log00404EE0(const char* format, ...) {
          va_list args;
          va_start(args, format);
@@ -21,6 +45,7 @@ namespace SkyBSAPatches {
 
       void Apply() {
          WriteRelJump(0x00404EE0, (UInt32)&Log00404EE0);
+         LogLazyLokups::Apply();
       }
    }
 }

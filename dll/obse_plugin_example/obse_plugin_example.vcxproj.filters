@@ -14,6 +14,7 @@
     <ClCompile Include="shared.cpp" />
     <ClCompile Include="Patches\BSAOverridingBSA.cpp" />
     <ClCompile Include="Patches\Logging.cpp" />
+    <ClCompile Include="Patches\BSARedirection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\obse\obse\Commands_ActiveEffect.cpp" />
@@ -111,7 +112,6 @@
     <ClInclude Include="..\obse\obse\Tasks.cpp" />
     <ClInclude Include="..\obse\obse\ThreadLocal.cpp" />
     <ClInclude Include="..\obse\obse\Utilities.cpp" />
-    <ClInclude Include="..\obse\obse\*.cpp" />
     <ClInclude Include="..\obse\obse\*.cpp" />
     <ClInclude Include="..\obse\obse\*.cpp" />
     <ClInclude Include="..\obse\obse\*.cpp" />
@@ -268,7 +268,6 @@
     <ClInclude Include="..\obse\obse\ThreadLocal.h" />
     <ClInclude Include="..\obse\obse\Utilities.h" />
     <ClInclude Include="..\obse\obse\VarMap.h" />
-    <ClInclude Include="..\obse\obse\*.h" />
     <ClInclude Include="..\obse\obse\*.h" />
     <ClInclude Include="..\obse\obse\*.h" />
     <ClInclude Include="..\obse\obse\*.h" />
@@ -7572,6 +7571,7 @@
     <ClInclude Include="shared.h" />
     <ClInclude Include="Patches\Logging.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Patches\BSARedirection.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
