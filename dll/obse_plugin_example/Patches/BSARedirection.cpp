@@ -15,13 +15,12 @@ namespace SkyBSAPatches {
       // Forcing the "first BSA to load for this file type" to nullptr should have the 
       // same effect.
       //
-      // NOTE: When testing with a version of this code that disabled this optimization 
-      // for ALL file types, I experienced a significant performance degradation when 
-      // traveling through the game world -- no doubt the result of LOD lookups being 
-      // slowed down. Current code does this only for textures, consistent with the 
-      // "ArchiveInvalidation Invalidated" BSA Redirection used by many.
+      constexpr bool ce_texturesOnly = false;
       //
       void _stdcall Inner(RE::Archive* loaded) {
+         if (!ce_texturesOnly)
+            return; // redirect all filetypes
+         //
          UInt32 type = 0;
          do {
             if (type == 1) // BSA-redirect textures

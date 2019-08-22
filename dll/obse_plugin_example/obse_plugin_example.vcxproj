@@ -131,6 +131,8 @@
     </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Patches\BSARedirection.cpp" />
+    <ClCompile Include="Patches\Exploratory.cpp" />
+    <ClCompile Include="Patches\Exploratory\Benchmarking.cpp" />
     <ClCompile Include="Patches\Logging.cpp" />
     <ClCompile Include="Patches\LooseFilesAlwaysOverride.cpp" />
     <ClCompile Include="Patches\BSAOverridingBSA.cpp" />
@@ -141,6 +143,8 @@
   <ItemGroup>
     <ClInclude Include="Patches\BSAOverridingBSA.h" />
     <ClInclude Include="Patches\BSARedirection.h" />
+    <ClInclude Include="Patches\Exploratory.h" />
+    <ClInclude Include="Patches\Exploratory\Benchmarking.h" />
     <ClInclude Include="Patches\Logging.h" />
     <ClInclude Include="Patches\LooseFilesAlwaysOverride.h" />
     <ClInclude Include="resource.h" />

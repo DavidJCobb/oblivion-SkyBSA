@@ -24,12 +24,12 @@ namespace SkyBSAPatches {
          // will always be iterated in order.
          //
          void Apply() {
-            {  // Subroutine 0x0042EA60
+            {  // FindBSAThatContainsFile+0x8B
                SafeWrite8(0x0042EAEB + 0, 0x31); // XOR ESI, ESI
                SafeWrite8(0x0042EAEB + 1, 0xF6);
                SafeWrite32(0x0042EAEB + 2, 0x90909090); // NOP; NOP; NOP; NOP
             }
-            {  // Subroutine 0x0042E8E0
+            {  // FindFileInBSA+0x8B
                SafeWrite8(0x0042E96B + 0, 0x31); // XOR EBX, EBX
                SafeWrite8(0x0042E96B + 1, 0xDB);
                SafeWrite32(0x0042E96B + 2, 0x90909090); // NOP; NOP; NOP; NOP

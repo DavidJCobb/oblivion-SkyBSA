@@ -4,6 +4,7 @@
 #include "Patches/LooseFilesAlwaysOverride.h"
 #include "Patches/BSAOverridingBSA.h"
 #include "Patches/BSARedirection.h"
+#include "Patches/Exploratory.h"
 #include "Patches/Logging.h"
 
 IDebugLog    gLog("Data\\OBSE\\Plugins\\SkyBSA.log");
@@ -53,6 +54,7 @@ extern "C" {
          SkyBSAPatches::BSAOverridingBSA::Apply();
          SkyBSAPatches::BSARedirection::Apply();
          //SkyBSAPatches::Logging::Apply();
+         SkyBSAPatches::Exploratory::Apply();
       }
       _MESSAGE("DLL successfully loaded.");
       return true;
