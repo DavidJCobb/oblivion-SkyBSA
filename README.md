@@ -69,8 +69,6 @@ Moving on: most lazy lookups are performed properly, specifying the folder hash,
 
 I have been referred to [Strand Magic](https://www.nexusmods.com/oblivion/mods/48460) as a reproducible test case for BSA redirection, and I can confirm that without BSA redirection or an equivalent, this mod's textures fail to load.
 
-At this point, I'm capable of recreating the effect of BSA redirection entirely programmatically, without the need for dummy BSA files or changes to sArchiveList. However, I don't know whether I should do it for texture files only or for all file types. Typical BSA redirection setups only apply to texture files, which fixes loose file handling but doesn't fix conflicts between BSAs; applying redirection to all filetypes would fix conflicts between BSAs, but could worsen performance slightly.
-
 #### Performance research
 
 BSA redirection is not a performance concern, and should not be a performance concern even if expanded to all filetypes. The performance impact of searching all loaded BSAs for a file is so small that it's not even measurable unless you measure the impact of 100000 file lookups at a time. Concrete measurements are below.
@@ -102,7 +100,7 @@ Lazy lookups in these tests *did* supply a file path. Each test represents 10000
 
 We can clearly see that the lazy lookups *themselves* are practically instantaneous, with the bulk of the time being spent on generating 64-bit hashes from the folder and file names. (Our test file path was 50 characters long, with no "Data/" prefix. 50 bytes times 100000 hashing operations means we have about 4.77 megabytes of text to hash.) Full lookups are themselves incredibly fast; again, the above times are for *one hundred thousand hash operations and worst-case file lookups in a row.*
 
-The table below indicates times for full lookups versus lazy lookups for a loose texture file, with a BSA redirection equivalent: a version of SkyBSA modified to force all lazy BSAs to nullptr, such that lazy lookups fail immediately.
+The table below indicates times for full lookups versus lazy lookups for a loose texture file, with a BSA redirection equivalent: a development build of SkyBSA modified to force all lazy BSAs to nullptr, such that lazy lookups fail immediately.
 
 | Full lookup time | Hash and lazy lookup time | Lazy lookup time |
 | ---------------: | ------------------------: | ---------------: |
@@ -119,7 +117,7 @@ The table below indicates times for full lookups versus lazy lookups for a loose
 
 The lazy lookups in this test abort immediately because there's no matching lazy BSA to pull from; as such, all of the times in the second columns are the time it takes to generate 64-bit hashes of a path's folder and file names. (So as above, it takes between a tenth and a twentieth of a second to hash nearly five megabytes of text.) Because every full lookup re-generates these hashes, we can subtract the times in the second column from the first column to find the maximum time it takes to actually search all BSAs for a file with known hashes: on average, 0.0377 seconds per 100000 searches.
 
-I think this pretty conclusively demonstrates that applying BSA redirection to a given filetype is basically a no-cost enhancement.
+I think this pretty conclusively demonstrates that applying BSA redirection to a given filetype is basically a no-cost enhancement. As of version 1.1, SkyBSA now forces all lazy BSAs to nullptr, recreating the effect of BSA redirection for all filetypes.
 
 ### Miscellaneous information
 
