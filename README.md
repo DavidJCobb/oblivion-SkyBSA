@@ -115,7 +115,7 @@ The table below indicates times for full lookups versus lazy lookups for a loose
 |    0.187 seconds |             0.172 seconds |    0.000 seconds |
 |    0.203 seconds |             0.157 seconds |    0.000 seconds |
 
-The lazy lookups in this test abort immediately because there's no matching lazy BSA to pull from; as such, all of the times in the second columns are the time it takes to generate 64-bit hashes of a path's folder and file names. (So as above, it takes between a tenth and a twentieth of a second to hash nearly five megabytes of text.) Because every full lookup re-generates these hashes, we can subtract the times in the second column from the first column to find the maximum time it takes to actually search all BSAs for a file with known hashes: on average, 0.0377 seconds per 100000 searches.
+The lazy lookups in this test abort immediately because there's no matching lazy BSA to pull from; as such, all of the times in the second columns are the time it takes to generate 64-bit hashes of a path's folder and file names. (So as above, it takes between a tenth and a fifth of a second to hash nearly five megabytes of text.) Because every full lookup re-generates these hashes, we can subtract the times in the second column from the first column to find the maximum time it takes to actually search all BSAs for a file with known hashes: on average, 0.0377 seconds per 100000 searches.
 
 I think this pretty conclusively demonstrates that applying BSA redirection to a given filetype is basically a no-cost enhancement. As of version 1.1, SkyBSA now forces all lazy BSAs to nullptr, recreating the effect of BSA redirection for all filetypes.
 
