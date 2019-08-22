@@ -63,13 +63,63 @@ The game keeps track of the first Archive to load for each file type that Archiv
 
 (Lazy lookups are performed as part of a two-stage process. The game creates a "queued file" object e.g. QueuedFileEntry or QueuedTexture, which uses 64-bit hashes of the folder and filenames to find the metadata (offset and size) for a file in the relevant lazy BSA; later on, the archived file is loaded from the BSA using this metadata.)
 
-Before I continue describing lazy lookups, there's something you need to know about file lookups in general. Generally speaking, Oblivion's code will ask an Archive instance whether it contains an entry that matches a 64-bit folder name hash and a 64-bit filename hash; however, Oblivion will also supply the original file path as a string, alongside these hashes, so that the Archive can perform loose file checks. Lazy lookups behave similarly: there is a central lazy lookup function that takes a filetype number (to specify the lazy BSA to use), a folder name hash, a filename hash, and the original file path, and it supplies the latter three parameters to the appropriate lazy BSA. This means that *if the game does a lazy lookup properly*, then lazy lookups should only cause problems in the case of two BSAs having different versions of the same file (because the lazy BSA, which will inevitably be a vanilla one if you don't use BSA redirection, will be preferred); BSA redirection will solve this problem, but to no effect, since a different bug causes the exact same thing to happen anyway (see top of article).
+Before I continue describing lazy lookups, there's something you need to know about file lookups in general. Generally speaking, Oblivion's code will ask an Archive instance whether it contains an entry that matches a 64-bit folder name hash and a 64-bit filename hash; however, Oblivion will also supply the original file path as a string, alongside these hashes, so that the Archive can perform loose file checks (these checks are performed only once per archived file; the result is remembered). Lazy lookups behave similarly: there is a central lazy lookup function that takes a filetype number (to specify the lazy BSA to use), a folder name hash, a filename hash, and the original file path, and it supplies the latter three parameters to the appropriate lazy BSA. This means that *if the game does a lazy lookup properly*, then lazy lookups should only cause problems in the case of two BSAs having different versions of the same file (because the lazy BSA, which will inevitably be a vanilla one if you don't use BSA redirection, will be preferred); BSA redirection will solve this problem, but to no effect, since a different bug causes the exact same thing to happen anyway (see top of article).
 
 Moving on: most lazy lookups are performed properly, specifying the folder hash, file hash, and full file path as a string. However, there are exceptions. Some forms can have MODT, MO2T, MO3T, MO4T, or NIFT subrecords, which specify folder and file hashes for textures, but not file paths. When these subrecords load, they perform a lazy lookup using only the hashes, which means that the game cannot and does not check for loose files. This is the bug that BSA redirection visibly solves, by causing all lazy texture lookups to fail.
 
 I have been referred to [Strand Magic](https://www.nexusmods.com/oblivion/mods/48460) as a reproducible test case for BSA redirection, and I can confirm that without BSA redirection or an equivalent, this mod's textures fail to load.
 
 At this point, I'm capable of recreating the effect of BSA redirection entirely programmatically, without the need for dummy BSA files or changes to sArchiveList. However, I don't know whether I should do it for texture files only or for all file types. Typical BSA redirection setups only apply to texture files, which fixes loose file handling but doesn't fix conflicts between BSAs; applying redirection to all filetypes would fix conflicts between BSAs, but could worsen performance slightly.
+
+#### Performance research
+
+BSA redirection is not a performance concern, and should not be a performance concern even if expanded to all filetypes. The performance impact of searching all loaded BSAs for a file is so small that it's not even measurable unless you measure the impact of 100000 file lookups at a time. Concrete measurements are below.
+
+First, a few clarifications:
+
+* "Full lookups" here means lookups done using only a file path and filetype flag. For each full lookup, the game must generate 64-bit hashes of the folder and file names, and then search all loaded BSAs.
+* "Lazy lookups" here means lookups done using a filetype index, 64-bit hashes of the folder and file names, and a file path (for loose file checks). These lookups check only the lazy BSAs.
+* MODT and friends only apply to textures (known filetype index), already have 64-bit hashes to work with (no overhead from generating them), and do not supply a file path.
+
+This table indicates times for full lookups versus lazy lookups for a loose texture file, without any BSA redirection. This represents a worse-case lookup: even if the loose file is found to override an archived one, this won't halt the search but rather will just act as if the archived file doesn't exist; that means that for a loose file that overrides all archived files, we will search through all potential matches. (Hash lists are ordered, so we can stop searching through any given archived folder or archive when we find a hash that is larger than the hash we're searching for. This means that a worst-case lookup isn't outright catastrophic; we don't have to search through every single archived file in the archive, but we do have to search through every single archived file and folder that we can't rule out based on hashes alone.)
+
+Lazy lookups in these tests *did* supply a file path. Each test represents 100000 lookups done in a row. The first test did a full lookup using only a file path; the second test hashed the file path and did a lazy lookup (so, hashing 100000 times and looking up 100000 times); the third test hashed the file path just once and then reused those hashes for 100000 lookups.
+
+| Full lookup time | Hash and lazy lookup time | Lazy lookup time |
+| ---------------: | ------------------------: | ---------------: |
+|    0.203 seconds |             0.188 seconds |    0.000 seconds |
+|    0.203 seconds |             0.156 seconds |    0.000 seconds |
+|    0.203 seconds |             0.172 seconds |    0.000 seconds |
+|    0.234 seconds |             0.203 seconds |    0.000 seconds |
+|    0.203 seconds |             0.187 seconds |    0.000 seconds |
+|    0.203 seconds |             0.172 seconds |    0.000 seconds |
+|    0.188 seconds |             0.171 seconds |    0.000 seconds |
+|    0.203 seconds |             0.172 seconds |    0.000 seconds |
+|    0.203 seconds |             0.187 seconds |    0.000 seconds |
+|    0.204 seconds |             0.171 seconds |    0.000 seconds |
+|    0.219 seconds |             0.187 seconds |    0.000 seconds |
+|    0.187 seconds |             0.172 seconds |    0.000 seconds |
+
+We can clearly see that the lazy lookups *themselves* are practically instantaneous, with the bulk of the time being spent on generating 64-bit hashes from the folder and file names. (Our test file path was 50 characters long, with no "Data/" prefix. 50 bytes times 100000 hashing operations means we have about 4.77 megabytes of text to hash.) Full lookups are themselves incredibly fast; again, the above times are for *one hundred thousand hash operations and worst-case file lookups in a row.*
+
+The table below indicates times for full lookups versus lazy lookups for a loose texture file, with a BSA redirection equivalent: a version of SkyBSA modified to force all lazy BSAs to nullptr, such that lazy lookups fail immediately.
+
+| Full lookup time | Hash and lazy lookup time | Lazy lookup time |
+| ---------------: | ------------------------: | ---------------: |
+|    0.188 seconds |             0.172 seconds |    0.000 seconds |
+|    0.188 seconds |             0.172 seconds |    0.000 seconds |
+|    0.219 seconds |             0.156 seconds |    0.000 seconds |
+|    0.235 seconds |             0.172 seconds |    0.000 seconds |
+|    0.204 seconds |             0.171 seconds |    0.000 seconds |
+|    0.187 seconds |             0.172 seconds |    0.000 seconds |
+|    0.219 seconds |             0.156 seconds |    0.000 seconds |
+|    0.203 seconds |             0.156 seconds |    0.000 seconds |
+|    0.187 seconds |             0.172 seconds |    0.000 seconds |
+|    0.203 seconds |             0.157 seconds |    0.000 seconds |
+
+The lazy lookups in this test abort immediately because there's no matching lazy BSA to pull from; as such, all of the times in the second columns are the time it takes to generate 64-bit hashes of a path's folder and file names. (So as above, it takes between a tenth and a twentieth of a second to hash nearly five megabytes of text.) Because every full lookup re-generates these hashes, we can subtract the times in the second column from the first column to find the maximum time it takes to actually search all BSAs for a file with known hashes: on average, 0.0377 seconds per 100000 searches.
+
+I think this pretty conclusively demonstrates that applying BSA redirection to a given filetype is basically a no-cost enhancement.
 
 ### Miscellaneous information
 
