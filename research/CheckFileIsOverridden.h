@@ -19,11 +19,11 @@ bool Archive::CheckFileIsOverridden(BSAEntry& file, const char* looseFilePath) {
          //
          // this->myDateModified is stored in registers edi and esi
          //
-         // esp10.unk24 is checked one register at a time, using ecx
+         // esp10.st_mtime is checked one register at a time, using ecx
          //
          // timestamp type is __time64_t
          //
-         if (esp10.unk20 > this->myDateModified) {
+         if (esp10.st_mtime > this->myDateModified) {
             file.offset &= 0x80000000; // a file with a zero offset is "invalid"
             return true;
          }
