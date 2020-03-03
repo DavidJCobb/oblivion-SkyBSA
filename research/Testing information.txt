@@ -1,0 +1,3 @@
+CobbTestBSA.esp and its accompanying BSA contain textures that override the vanilla sky and cloud textures with checkerboard patterns.
+
+<Test loose files.zip> contains the same textures as loose files with the Date Modified set to January 1st 1970.
