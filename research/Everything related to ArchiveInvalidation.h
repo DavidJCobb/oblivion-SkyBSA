@@ -499,7 +499,7 @@ Archive* LoadBSAFile(const char* filepath, UInt16 /*always zero*/overrideFiletyp
       if (!ecx) {
          *g_archiveList = new ...; // blah blah blah; inlined
       }
-      ecx->Prepend(esi);
+      ecx->Append(esi);
       if (overrideFiletypeFlags)
          esi->header.fileFlags = overrideFiletypeFlags;
    } else {
@@ -684,11 +684,10 @@ bool sub0042F610() {
             // with that flag -- so, the first texture BSA, the first mesh 
             // BSA, and so on.
             //
-            // I suspect that THIS is what makes "BSA Redirection" actually 
-            // influence the game. At present, I still don't know what it 
-            // actually DOES -- I don't know where this list of BSAs is 
-            // used -- but I know that per all the above, it has absolutely 
-            // nothing whatsoever to do with ArchiveInvalidation.
+            // Subsequent research has established that there are cases 
+            // where the game will try looking files up from these BSAs 
+            // first, before then doing a normal lookup. BSA redirection 
+            // works by forcing an empty BSA into this list for textures.
             //
             if (eax->header.fileFlags & (1 << ecx))
                if (!(0x00B338E8)[ecx])
